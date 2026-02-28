@@ -1,0 +1,115 @@
+- name: Criar usuario postgres bloqueado no Linux
+  ansible.builtin.user:
+    name: postgres
+    shell: /usr/sbin/nologin
+    create_home: yes
+
+- name: Criar diretorio base /dados
+  file:
+    path: /dados
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: "0700"
+
+- name: Instalar dependencias
+  apt:
+    name:
+      - wget
+      - gnupg
+    update_cache: yes
+
+- name: Adicionar repositorio oficial PostgreSQL
+  shell: |
+    wget -qO - https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/postgresql.gpg
+    echo "deb [signed-by=/usr/share/keyrings/postgresql.gpg] http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+  args:
+    creates: /etc/apt/sources.list.d/pgdg.list
+
+- name: Atualizar cache
+  apt:
+    update_cache: yes
+
+- name: Instalar PostgreSQL
+  apt:
+    name:
+      - postgresql-{{ pg_version }}
+      - postgresql-client-{{ pg_version }}
+      - python3-psycopg2
+    state: present
+
+- name: Remover cluster default
+  command: pg_dropcluster --stop {{ pg_version }} main
+  args:
+    removes: /var/lib/postgresql/{{ pg_version }}/main
+
+- name: Criar novo cluster no /dados
+  command: pg_createcluster {{ pg_version }} main --datadir=/dados/{{ pg_version }}/main
+  args:
+    creates: /dados/postgres/{{ pg_version }}/PG_VERSION
+
+- name: Subir cluster explicitamente
+  command: pg_ctlcluster {{ pg_version }} main start
+
+- name: Iniciar servico PostgreSQL
+  service:
+    name: postgresql
+    state: started
+    enabled: yes
+
+- name: Criar usuario zabbix no banco
+  become_user: postgres
+  community.postgresql.postgresql_user:
+    name: "{{ zbx_db_user }}"
+    password: "{{ zbx_db_password }}"
+    role_attr_flags: LOGIN
+
+- name: Criar database zabbixdb
+  become_user: postgres
+  community.postgresql.postgresql_db:
+    name: "{{ zbx_db_name }}"
+    owner: "{{ zbx_db_user }}"
+
+- name: Garantir owner do banco
+  community.postgresql.postgresql_db:
+    name: "{{ zbx_db_name }}"
+    owner: "{{ zbx_db_user }}"
+    login_unix_socket: /var/run/postgresql
+  become: true
+  become_user: postgres
+
+- name: Conceder privilegios no banco
+  community.postgresql.postgresql_privs:
+    database: "{{ zbx_db_name }}"
+    roles: "{{ zbx_db_user }}"
+    objs: ALL_IN_SCHEMA
+    type: table
+    privs: ALL
+    schema: public
+    login_unix_socket: /var/run/postgresql
+  become: true
+  become_user: postgres
+
+- name: Conceder privilegios nas sequences
+  community.postgresql.postgresql_privs:
+    db: "{{ zbx_db_name }}"
+    role: "{{ zbx_db_user }}"
+    type: sequence
+    objs: ALL_IN_SCHEMA
+    schema: public
+    privs: ALL
+    login_unix_socket: /var/run/postgresql
+  become: true
+  become_user: postgres
+
+- name: Definir default privileges para futuras tabelas
+  community.postgresql.postgresql_query:
+    db: "{{ zbx_db_name }}"
+    query: |
+      ALTER DEFAULT PRIVILEGES IN SCHEMA public
+      GRANT ALL ON TABLES TO {{ zbx_db_user }};
+      ALTER DEFAULT PRIVILEGES IN SCHEMA public
+      GRANT ALL ON SEQUENCES TO {{ zbx_db_user }};
+    login_unix_socket: /var/run/postgresql
+  become: true
+  become_user: postgres

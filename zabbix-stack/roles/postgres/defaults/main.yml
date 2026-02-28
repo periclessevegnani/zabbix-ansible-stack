@@ -1,0 +1,8 @@
+pg_version: "16"
+pg_listen_address: "0.0.0.0"
+pg_port: 5432
+zbx_db_name: "zabbixdb"
+zbx_db_user: "zabbix"
+zbx_db_password: "zC4Bb!x2*24"
+zbx_ubuntu_release: "24.04"
+zbx_repo_codename: "noble"

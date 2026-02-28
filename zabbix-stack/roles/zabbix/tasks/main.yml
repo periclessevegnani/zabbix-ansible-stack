@@ -1,0 +1,103 @@
+- name: Criar usuario zabbix bloqueado no Linux
+  ansible.builtin.user:
+    name: zabbix
+    shell: /usr/sbin/nologin
+    create_home: yes
+
+- name: Baixar chave oficial Zabbix
+  ansible.builtin.get_url:
+    url: https://repo.zabbix.com/zabbix-official-repo.key
+    dest: /usr/share/keyrings/zabbix.gpg.key
+    mode: 0644
+
+- name: Converter chave para formato GPG
+  ansible.builtin.command:
+    cmd: gpg --dearmor -o /usr/share/keyrings/zabbix.gpg /usr/share/keyrings/zabbix.gpg.key
+    creates: /usr/share/keyrings/zabbix.gpg
+
+- name: Remover chave temporaria
+  ansible.builtin.file:
+    path: /usr/share/keyrings/zabbix.gpg.key
+    state: absent
+
+- name: Adicionar repositorio Zabbix
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/usr/share/keyrings/zabbix.gpg] https://repo.zabbix.com/zabbix/{{ zbx_version }}/ubuntu {{ zbx_repo_codename }} main"
+    state: present
+
+- name: Atualizar cache
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Garantir diretorio web do Zabbix
+  file:
+    path: /etc/zabbix/web
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Instalar pacotes Zabbix
+  apt:
+    name:
+      - libapache2-mod-php
+      - php
+      - php8.3-pgsql
+      - apache2
+      - zabbix-apache-conf
+      - zabbix-server-pgsql
+      - zabbix-frontend-php
+      - zabbix-agent
+    state: present
+    update_cache: yes
+
+- name: Baixar script SQL do Zabbix
+  apt:
+    name: zabbix-sql-scripts
+    state: present
+    update_cache: yes
+
+- name: Checar se o script SQL baixou
+  stat:
+    path: /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz
+  register: zbx_sql
+
+- name: Importar schema de tabelas do Zabbix
+  become_user: postgres
+  shell: |
+    zcat /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz | psql {{ zbx_db_name }}
+  environment:
+    PGPASSWORD: "{{ zbx_db_password }}"
+  args:
+    executable: /bin/bash
+  when: zbx_sql.stat.exists
+
+- name: Configurar senha DB no Zabbix
+  template:
+    src: zabbix_server.conf.j2
+    dest: /etc/zabbix/zabbix_server.conf
+  notify: Restart Zabbix
+
+- name: Criar configuracao web do Zabbix
+  ansible.builtin.template:
+    src: zabbix.conf.php.j2
+    dest: /etc/zabbix/web/zabbix.conf.php
+    owner: www-data
+    group: www-data
+    mode: "0640"
+  notify: Restart Apache
+
+- name: Habilitar e iniciar servicos
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  loop:
+    - zabbix-server
+    - zabbix-agent
+    - apache2
+
+- name: Restart Apache
+  service:
+    name: apache2
+    state: restarted

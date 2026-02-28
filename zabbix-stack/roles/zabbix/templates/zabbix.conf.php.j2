@@ -1,0 +1,12 @@
+<?php
+global $DB;
+$DB["TYPE"]           = "POSTGRESQL";
+$DB["SERVER"]         = "{{ zbx_db_host | default("localhost") }}";
+$DB["PORT"]           = "{{ pg_port }}";
+$DB["DATABASE"]       = "{{ zbx_db_name }}";
+$DB["USER"]           = "{{ zbx_db_user }}";
+$DB["PASSWORD"]       = "{{ zbx_db_password }}";
+$ZBX_SERVER           = "{{ zbx_server_host | default("localhost") }}";
+$ZBX_SERVER_PORT      = "10051";
+$ZBX_SERVER_NAME      = "{{ zbx_server_name | default("Zabbix Server") }}";
+$IMAGE_FORMAT_DEFAULT = IMAGE_FORMAT_PNG;
