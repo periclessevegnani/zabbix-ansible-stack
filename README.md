@@ -16,7 +16,6 @@ cd
 git clone https://github.com/periclessevegnani/zabbix-ansible-stack.git
 cd zabbix-ansible-stack
 ```
-<br>
 - Baixe e instale o Ansible:<br>
 ```bash
 apt update
@@ -25,13 +24,11 @@ add-apt-repository --yes --update ppa:ansible/ansible
 apt install -y ansible
 ansible --version
 ```
-<br>
 - Para rodar o playbook:<br>
 ```bash
 ansible-galaxy collection install community.postgresql
 ansible-playbook -i inventory.ini deploy.yml -v
 ```
-<br>
 - Acessar o front-end do Zabbix:<br>
 ```bash
 http://IP_DO_SERVIDOR/zabbix
