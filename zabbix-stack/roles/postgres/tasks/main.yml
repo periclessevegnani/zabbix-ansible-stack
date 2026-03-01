@@ -48,6 +48,14 @@
   args:
     creates: /dados/postgres/{{ pg_version }}/PG_VERSION
 
+- name: Criar custom PostgreSQL config
+  template:
+    src: custom.conf.j2
+    dest: "/etc/postgresql/{{ pg_version }}/main/conf.d/custom.conf"
+    owner: postgres
+    group: postgres
+    mode: 0644
+
 - name: Subir cluster explicitamente
   command: pg_ctlcluster {{ pg_version }} main start
 
