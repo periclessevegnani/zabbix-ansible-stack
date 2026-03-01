@@ -11,13 +11,7 @@ Edite os arquivos abaixo para personalizar sua instalacao:<br>
   Escolha a versao do Zabbix desejada na variavel "zbx_version", aqui foi utilizada a versao 6.4.<br>
 
 Passo-a-passo:<br>
-- Baixe o Git e os arquivos do GitHub:<br>
-```bash
-apt install -y git
-cd
-git clone https://github.com/periclessevegnani/zabbix-ansible-stack.git
-cd zabbix-ansible-stack
-```
+
 - Baixe e instale o Ansible:<br>
 ```bash
 apt update
@@ -25,6 +19,14 @@ apt install -y software-properties-common
 add-apt-repository --yes --update ppa:ansible/ansible
 apt install -y ansible
 ansible --version
+```
+- Baixe o Git e os arquivos do GitHub:<br>
+```bash
+apt update
+apt install -y git
+cd
+git clone https://github.com/periclessevegnani/zabbix-ansible-stack.git
+cd zabbix-ansible-stack
 ```
 - Para rodar o playbook:<br>
 ```bash
