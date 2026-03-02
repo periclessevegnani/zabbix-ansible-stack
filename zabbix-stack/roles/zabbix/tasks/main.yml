@@ -84,7 +84,7 @@
     dest: /etc/zabbix/zabbix_agentd.conf
   notify: Restart Zabbix
 
-- name: Criar configuracao web do Zabbix
+- name: Personalizar zabbix.conf.php
   ansible.builtin.template:
     src: zabbix.conf.php.j2
     dest: /etc/zabbix/web/zabbix.conf.php

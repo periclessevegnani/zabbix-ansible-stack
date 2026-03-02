@@ -4,7 +4,7 @@
     state: present
     update_cache: yes
 
-- name: Copiar configuracao do Zabbix para Apache
+- name: Personalizar apache.conf
   copy:
     src: files/apache.conf
     dest: /etc/apache2/conf-available/zabbix.conf
