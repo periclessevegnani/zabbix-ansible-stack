@@ -43,10 +43,10 @@
   args:
     removes: /var/lib/postgresql/{{ pg_version }}/main
 
-      #- name: Criar novo cluster no /dados
-      #  command: pg_createcluster {{ pg_version }} main --datadir=/dados/{{ pg_version }}/main
-      #  args:
-      #    creates: /dados/postgres/{{ pg_version }}/PG_VERSION
+- name: Criar novo cluster no /dados
+  command: pg_createcluster {{ pg_version }} main --datadir=/dados/{{ pg_version }}/main
+  args:
+    creates: /dados/postgres/{{ pg_version }}/PG_VERSION
 
 - name: Criar custom PostgreSQL config
   template:
