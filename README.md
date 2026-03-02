@@ -1,7 +1,7 @@
 Autor: Pericles Sevegnani<br>
 Contato: periclessevegnani@gmail.com<br>
 
-O objetivo dessa instalacao eh baixar, instalar e configurar o Zabbix + PostgreSQL no Linux Ubuntu.<br>
+O objetivo dessa instalacao eh baixar, instalar e configurar o Zabbix (com Apache) + PostgreSQL no Linux Ubuntu.<br>
 Edite os arquivos abaixo para personalizar sua instalacao:<br>
 - zabbix-stack/roles/postgres/defaults/main.yml:<br>
   Escolha a versao do banco desejada na variavel "pg_version".<br>
