@@ -1,7 +1,7 @@
 Autor: Pericles Sevegnani<br>
 Contato: periclessevegnani@gmail.com<br>
 
-O objetivo dessa instalacao eh baixar, instalar e configurar o Zabbix (com Apache) + PostgreSQL no Linux Ubuntu.<br>
+O objetivo desse projeto eh automatizar a instalacao e configucao do Zabbix (com Apache) + PostgreSQL no Linux Ubuntu via Ansible.<br>
 Edite os arquivos abaixo para personalizar sua instalacao:<br>
 - zabbix-stack/roles/postgres/defaults/main.yml:<br>
   Escolha a versao do banco desejada na variavel "pg_version".<br>
@@ -9,6 +9,13 @@ Edite os arquivos abaixo para personalizar sua instalacao:<br>
   Este playbook foi desenvolvido para Ubuntu 24.04, por isso a variavel "zbx_repo_codename" esta setada para "noble", ajuste para o seu caso.<br>
 - zabbix-stack/roles/zabbix/defaults/main.yml:<br>
   Escolha a versao do Zabbix desejada na variavel "zbx_version", aqui foi utilizada a versao 6.4.<br>
+
+Importante: apos a instalacao, revise os arquivos de configuracao criados, como:<br>
+- custom.conf: dentro do diretorio /etc/postgresql/16/main/conf.d/ do PostgreSQL<br>
+- zabbix.conf: dentro do diretorio /etc/apache2/conf-enabled do Apache<br>
+- zabbix_server.conf: dentro do diretorio /etc/zabbix do Zabbix<br>
+- zabbix_agentd.conf: dentro do diretorio /etc/zabbix do Zabbix<br>
+Esses arquivos contem parametrizacoes especificas, como nome/IP de hosts, configuracoes de memoria e performance.
 
 Passo-a-passo:<br>
 
