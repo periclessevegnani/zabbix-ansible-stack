@@ -35,7 +35,7 @@
     state: directory
     owner: root
     group: root
-    mode: "0755"
+    mode: 0755
 
 - name: Instalar pacotes Zabbix
   apt:
@@ -72,10 +72,16 @@
     executable: /bin/bash
   when: zbx_sql.stat.exists
 
-- name: Configurar senha DB no Zabbix
+- name: Personalizar zabbix_server.conf
   template:
     src: zabbix_server.conf.j2
     dest: /etc/zabbix/zabbix_server.conf
+  notify: Restart Zabbix
+
+- name: Personalizar zabbix_agentd.conf
+  template:
+    src: zabbix_agentd.conf.j2
+    dest: /etc/zabbix/zabbix_agentd.conf
   notify: Restart Zabbix
 
 - name: Criar configuracao web do Zabbix
@@ -84,7 +90,7 @@
     dest: /etc/zabbix/web/zabbix.conf.php
     owner: www-data
     group: www-data
-    mode: "0640"
+    mode: 0640
   notify: Restart Apache
 
 - name: Habilitar e iniciar servicos
